@@ -484,12 +484,22 @@ utils.defineProperty(ProviderBridge.prototype, '_send', function (
       break
 
     case 'eth_sendTransaction':
+      const txRequest = params[0]
       signer.getAddress().then(
         function (address) {
-          if (utils.getAddress(params[0].from) !== address) {
-            respondError('invalid from address', Errors.InvalidParams)
+          if (txRequest.from) {
+            if (utils.getAddress(txRequest.from) !== address) {
+              respondError('invalid from address', Errors.InvalidParams)
+            }
+            delete(txRequest.from)
           }
-          signer.sendTransaction(params[0]).then(
+          
+          if (txRequest.gas) {
+            txRequest.gasLimit = txRequest.gas
+            delete(txRequest.gas)
+          }
+
+          signer.sendTransaction(txRequest).then(
             function (tx) {
               respond(tx.hash)
             },
