@@ -1,6 +1,6 @@
 {
   "name": "arb-ethers-web3-bridge",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Arbitrum bridge for converting ethers provider into web3",
   "author": "Offchain Labs, Inc.",
   "license": "Apache-2.0",
