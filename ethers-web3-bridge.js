@@ -525,6 +525,10 @@ utils.defineProperty(ProviderBridge.prototype, '_send', function (
     case 'net_listening':
     case 'net_peerCount':
     case 'net_version':
+        provider.getNetwork().then(network => {
+          respond(String(network.chainId))
+        })
+        break
     case 'eth_protocolVersion':
       setTimeout(function () {
         respond(self.sendSync(payload).result)
