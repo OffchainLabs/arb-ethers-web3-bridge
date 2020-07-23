@@ -16,4 +16,55 @@
 
 var ProviderBridge = require('./ethers-web3-bridge')
 
-module.exports = ProviderBridge
+
+// wrapProvider was inspired by https://github.com/ethereum-optimism/optimism-monorepo/blob/master/packages/ovm-truffle-provider-wrapper/index.ts
+function wrapProvider(provider) {
+  if (typeof provider !== 'object' || !provider['sendAsync']) {
+    throw Error(
+      'Invalid provider. Expected provider to conform to Truffle provider interface!'
+    )
+  }
+
+  let chainId = 'not set';
+	provider.sendAsync({
+      jsonrpc: "2.0",
+      method: "net_version",
+      params: [],
+      id: 0
+    }, (err, network) => {
+	  if (chainId == 'not set') {
+	    if (err) {
+	      throw Error("couldn't get chain id", err)
+	    }
+	    if (typeof(network.result) === 'string') {
+	    	network.result = parseInt(network.result)
+	    }
+	    chainId = network.result
+	  }
+	})
+  
+  const sendAsync = provider.sendAsync
+  const send = provider.send
+
+  provider.sendAsync = function(...args) {
+    if (args[0].method === 'eth_sendTransaction') {
+      // To properly set chainID for all transactions.
+      args[0].params[0].chainId = chainId
+    }
+    sendAsync.apply(this, args)
+  }
+
+  provider.send = function(...args) {
+    if (args[0].method === 'eth_sendTransaction') {
+      // To properly set chainID for all transactions.
+      args[0].params[0].chainId = chainId
+    }
+    send.apply(this, args)
+  }
+  return provider
+}
+
+module.exports = {
+	ProviderBridge,
+	wrapProvider
+}

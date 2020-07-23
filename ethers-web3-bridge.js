@@ -493,13 +493,8 @@ utils.defineProperty(ProviderBridge.prototype, '_send', function (
             }
             delete(txRequest.from)
           }
-          
-          if (txRequest.gas) {
-            txRequest.gasLimit = txRequest.gas
-            delete(txRequest.gas)
-          }
 
-          signer.sendTransaction(txRequest).then(
+          signer.sendTransaction(makeTransaction(txRequest)).then(
             function (tx) {
               respond(tx.hash)
             },
